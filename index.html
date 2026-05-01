@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Okinawa Birthday Trip 2026</title>
-    <!-- 使用 UMD 穩定版本連結 -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://unpkg.com/lucide@0.372.0/dist/umd/lucide.min.js"></script>
@@ -27,7 +26,6 @@
         <header class="relative w-full h-[250px] overflow-hidden">
             <img src="okinawa.jpg" alt="Okinawa" class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-            
             <div class="absolute right-4 bottom-16 flex space-x-2 z-30">
                 <button v-for="t in mainTabs" :key="t.id" @click="currentTab = t.id"
                         :class="['p-3 rounded-2xl transition-all duration-300 flex items-center justify-center bg-white/90 shadow-lg', currentTab === t.id ? 'tab-active' : 'text-teal-600']">
@@ -38,9 +36,8 @@
 
         <main class="content-card bg-[#E0F2FE] min-h-screen p-6 text-left">
             
-            <!-- 1. 每日行程表 (順路優化版) -->
+            <!-- 1. 每日行程表 (順路優化) -->
             <div v-if="currentTab === 'itinerary'" class="animate-fade-in">
-                <!-- 天氣資訊 -->
                 <div class="bg-white/70 backdrop-blur rounded-[30px] p-5 mb-6 flex items-center justify-between border border-white">
                     <div class="flex items-center space-x-4">
                         <div class="bg-orange-100 p-3 rounded-2xl text-orange-500"><i data-lucide="sun" class="w-8 h-8"></i></div>
@@ -49,19 +46,17 @@
                     <span class="bg-teal-500 text-white text-[10px] px-3 py-1 rounded-full font-bold">Day {{ getDayCount() }}</span>
                 </div>
 
-                <!-- 日期選單 -->
                 <div class="flex space-x-4 overflow-x-auto hide-scrollbar mb-8 py-2">
                     <div v-for="d in dates" :key="d.day" @click="selectedDate = d.day"
                          :class="['flex-shrink-0 w-16 h-24 rounded-3xl flex flex-col items-center justify-center cursor-pointer transition-all shadow-sm', 
                                  selectedDate === d.day ? 'date-item-active' : 'bg-white text-gray-400']">
-                        <span class="text-xs font-bold mb-1 uppercase">{{ d.week }}</span>
+                        <span class="text-xs font-bold mb-1 uppercase font-bold">{{ d.week }}</span>
                         <span class="text-2xl font-bold">{{ d.day }}</span>
                     </div>
                 </div>
 
                 <div id="itinerary-list" class="space-y-6">
-                    <div v-for="(item, idx) in dailyItinerary[selectedDate]" :key="item.id" @click="openEditItinerary(item)">
-                        <!-- 交通指示 -->
+                    <div v-for="(item, idx) in dailyItinerary[selectedDate]" :key="item.id" class="itinerary-item">
                         <div v-if="idx > 0" class="flex items-center justify-center space-x-2 my-4 text-cyan-600/40 font-bold text-[10px]">
                             <div class="h-[1px] bg-cyan-200 flex-grow"></div>
                             <i data-lucide="move-down" class="w-4 h-4"></i>
@@ -69,7 +64,6 @@
                             <div class="h-[1px] bg-cyan-200 flex-grow"></div>
                         </div>
 
-                        <!-- 航班 -->
                         <div v-if="item.category === '航班'" class="bg-gradient-to-br from-teal-400 to-cyan-500 rounded-[35px] p-6 text-white shadow-xl">
                             <div class="flex justify-between items-center mb-4"><span class="bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold">{{ item.flightNo }}</span></div>
                             <div class="flex justify-between items-center text-center">
@@ -78,7 +72,6 @@
                                 <div><p class="text-3xl font-bold">{{ item.arrTime }}</p><p class="text-[10px] opacity-70">OKA</p></div>
                             </div>
                         </div>
-                        <!-- 一般行程 -->
                         <div v-else class="bg-white rounded-[30px] p-5 shadow-sm border border-white flex items-center space-x-4 active:scale-95 transition-transform cursor-grab">
                             <div :class="['p-4 rounded-2xl', getCatStyle(item.category)]"><i :data-lucide="getIcon(item.category)" class="w-6 h-6"></i></div>
                             <div class="flex-grow">
@@ -95,16 +88,33 @@
                 <button @click="openAddItinerary()" class="fixed bottom-24 right-6 w-16 h-16 bg-teal-500 text-white rounded-full shadow-2xl z-50 flex items-center justify-center"><i data-lucide="plus" class="w-8 h-8"></i></button>
             </div>
 
-            <!-- 2. 工具/資訊 -->
+            <!-- 2. 資訊/翻譯分頁 -->
             <div v-if="currentTab === 'info'" class="animate-fade-in space-y-6">
+                <!-- 即時翻譯助手 -->
+                <div class="bg-white rounded-[35px] p-6 shadow-sm border border-white">
+                    <div class="flex items-center space-x-2 mb-4 text-teal-600 font-bold">
+                        <i data-lucide="languages" class="w-5 h-5"></i>
+                        <h3>日文翻譯助手</h3>
+                    </div>
+                    <textarea v-model="transText" placeholder="請輸入中文或英文..." class="w-full bg-gray-50 rounded-2xl p-4 text-sm outline-none h-24 focus:ring-2 focus:ring-teal-200 transition-all font-bold"></textarea>
+                    <button @click="translateToJP" :disabled="isTranslating" class="w-full mt-3 bg-teal-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all">
+                        {{ isTranslating ? '翻譯中...' : '自動翻譯成日文' }}
+                    </button>
+                    <div v-if="translatedResult" class="mt-4 p-4 bg-teal-50 rounded-2xl border border-teal-100 animate-fade-in">
+                        <p class="text-[10px] text-teal-400 font-bold uppercase mb-1">日文結果：</p>
+                        <p class="text-teal-700 font-bold text-lg">{{ translatedResult }}</p>
+                    </div>
+                </div>
+
+                <!-- 匯率工具 -->
                 <div class="bg-white rounded-[35px] p-8 shadow-sm text-center">
                     <h2 class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">JPY to HKD Exchange</h2>
                     <input type="number" v-model="jpyInput" class="w-full text-center text-5xl font-bold outline-none bg-transparent mb-2">
-                    <p class="text-4xl font-bold text-teal-600 tracking-tighter">$ {{ (jpyInput * 0.051).toFixed(2) }} <span class="text-xs">HKD</span></p>
+                    <p class="text-4xl font-bold text-teal-600 tracking-tighter">$ {{ (jpyInput * 0.051).toFixed(2) }} <span class="text-xs font-bold">HKD</span></p>
                 </div>
             </div>
 
-            <!-- 3. 購物 -->
+            <!-- 3. 購物清單 -->
             <div v-if="currentTab === 'shopping'" class="animate-fade-in space-y-4">
                 <div v-for="item in shoppingList" :key="item.id" class="bg-white rounded-[30px] p-4 shadow-sm flex items-center">
                     <div class="w-20 h-20 bg-gray-100 rounded-2xl overflow-hidden mr-4"><img v-if="item.image" :src="item.image" class="w-full h-full object-cover"></div>
@@ -113,7 +123,7 @@
                 <button @click="openAddShopping()" class="fixed bottom-24 right-6 w-16 h-16 bg-teal-500 text-white rounded-full shadow-2xl z-50 flex items-center justify-center"><i data-lucide="plus" class="w-8 h-8"></i></button>
             </div>
 
-            <!-- 4. 花費 -->
+            <!-- 4. 花費紀錄 -->
             <div v-if="currentTab === 'cost'" class="animate-fade-in space-y-6">
                 <div class="bg-gradient-to-br from-teal-400 to-cyan-500 rounded-[35px] p-8 text-white shadow-xl">
                     <p class="text-xs font-bold uppercase opacity-80 mb-1">Total (JPY)</p>
@@ -136,22 +146,13 @@
             </button>
         </nav>
 
-        <!-- 新增彈窗 -->
+        <!-- 彈窗 -->
         <div v-if="showModal" class="fixed inset-0 z-50 modal-bg flex items-end">
-            <div class="bg-white w-full max-w-md mx-auto rounded-t-[45px] p-8 animate-fade-in">
+            <div class="bg-white w-full max-w-md mx-auto rounded-t-[45px] p-8 animate-fade-in shadow-2xl">
                 <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">新增資料</h2><button @click="showModal = false" class="text-gray-300"><i data-lucide="x"></i></button></div>
-                <div v-if="currentTab === 'shopping'" class="space-y-4">
-                    <input v-model="shopForm.name" placeholder="商品名稱" class="w-full border-b py-2 font-bold outline-none">
-                    <input type="file" @change="handleImage" class="w-full py-2 text-xs">
-                </div>
-                <div v-if="currentTab === 'cost'" class="space-y-4 text-left">
-                    <input v-model="costForm.name" placeholder="花費名稱" class="w-full border-b py-2 font-bold outline-none">
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="number" v-model="costForm.amount" placeholder="金額 (JPY)" class="w-full border-b py-2 font-bold outline-none">
-                        <select v-model="costForm.payMethod" class="w-full border-b py-2 font-bold"><option>現金</option><option>信用卡</option></select>
-                    </div>
-                </div>
-                <button @click="saveForm" class="w-full mt-8 bg-teal-500 text-white font-bold py-4 rounded-2xl">儲存</button>
+                <div v-if="currentTab === 'shopping'" class="space-y-4"><input v-model="shopForm.name" placeholder="商品名稱" class="w-full border-b py-2 font-bold outline-none"><input type="file" @change="handleImage" class="w-full py-2 text-xs"></div>
+                <div v-if="currentTab === 'cost'" class="space-y-4 text-left"><input v-model="costForm.name" placeholder="名稱" class="w-full border-b py-2 font-bold outline-none"><input type="number" v-model="costForm.amount" placeholder="金額 (JPY)" class="w-full border-b py-2 font-bold outline-none"></div>
+                <button @click="saveForm" class="w-full mt-8 bg-teal-500 text-white font-bold py-4 rounded-2xl shadow-lg">儲存</button>
             </div>
         </div>
     </div>
@@ -165,6 +166,11 @@
                 const jpyInput = ref(1000);
                 const showModal = ref(false);
                 
+                // 翻譯功能變數
+                const transText = ref('');
+                const translatedResult = ref('');
+                const isTranslating = ref(false);
+
                 const shoppingList = ref([]);
                 const costList = ref([]);
                 const shopForm = ref({ name: '', image: null });
@@ -173,33 +179,27 @@
                 const dates = [{ week: 'Thu', day: 14 }, { week: 'Fri', day: 15 }, { week: 'Sat', day: 16 }, { week: 'Sun', day: 17 }];
                 const mainTabs = [{ id: 'itinerary', icon: 'map-pinned', name: '行程' }, { id: 'info', icon: 'info', name: '資訊' }, { id: 'shopping', icon: 'shopping-basket', name: '購物' }, { id: 'cost', icon: 'banknote', name: '花費' }];
                 
-                // 行程順路優化導入
                 const dailyItinerary = ref({
-                    14: [
-                        { id: 1, category: '航班', flightNo: 'UO828', depTime: '14:25', arrTime: '18:05', time: '14:25' },
-                        { id: 2, category: '美食', name: '國際通 屋台村', time: '20:00' }
-                    ],
-                    15: [ // KKDAY Day Tour (保持妳要求的順序)
-                        { id: 3, category: '景點', name: '知念岬', time: '10:00' },
-                        { id: 4, category: '景點', name: '沖繩世界 文化王國', time: '12:00' },
-                        { id: 5, category: '美食', name: '系滿海鮮市場', time: '14:00' },
-                        { id: 6, category: '景點', name: '瀬長島', time: '16:00' },
-                        { id: 7, category: '購物', name: 'ASHIBINAA Outlet', time: '18:00' },
-                        { id: 8, category: '購物', name: 'iias 沖繩豐崎', time: '20:00' }
-                    ],
-                    16: [ // 中部順路優化：由南往北一條線
-                        { id: 9, category: '景點', name: '殘波岬', time: '09:00' },
-                        { id: 10, category: '景點', name: '萬座毛', time: '11:00' },
-                        { id: 11, category: '景點', name: '古宇利島', time: '13:30' },
-                        { id: 12, category: '景點', name: '美麗海水族館', time: '15:30' },
-                        { id: 13, category: '景點', name: '美國村', time: '19:00', note: '回程經由美國村晚餐' }
-                    ],
-                    17: [
-                        { id: 14, category: '景點', name: '波上宮', time: '10:00' },
-                        { id: 15, category: '美食', name: '國際通', time: '13:00' },
-                        { id: 16, category: '航班', flightNo: 'UO829', depTime: '18:50', arrTime: '20:35', time: '18:50' }
-                    ]
+                    14: [{ id: 1, category: '航班', flightNo: 'UO828', depTime: '14:25', arrTime: '18:05', time: '14:25' }, { id: 2, category: '美食', name: '國際通 屋台村', time: '20:00' }],
+                    15: [{ id: 3, category: '景點', name: '知念岬', time: '10:00' }, { id: 4, category: '景點', name: '沖繩世界 文化王國', time: '12:00' }, { id: 5, category: '美食', name: '系滿海鮮市場', time: '14:00' }, { id: 6, category: '景點', name: '瀬長島', time: '16:00' }, { id: 7, category: '購物', name: 'ASHIBINAA Outlet', time: '18:00' }, { id: 8, category: '購物', name: 'iias 沖繩豐崎', time: '20:00' }],
+                    16: [{ id: 9, category: '景點', name: '殘波岬', time: '09:00' }, { id: 10, category: '景點', name: '萬座毛', time: '11:00' }, { id: 11, category: '景點', name: '古宇利島', time: '13:30' }, { id: 12, category: '景點', name: '美麗海水族館', time: '15:30' }, { id: 13, category: '景點', name: '美國村', time: '19:00' }],
+                    17: [{ id: 14, category: '景點', name: '波上宮', time: '10:00' }, { id: 15, category: '美食', name: '國際通', time: '13:00' }, { id: 16, category: '航班', flightNo: 'UO829', depTime: '18:50', arrTime: '20:35', time: '18:50' }]
                 });
+
+                // 翻譯功能邏輯
+                const translateToJP = async () => {
+                    if (!transText.value) return;
+                    isTranslating.value = true;
+                    try {
+                        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(transText.value)}&langpair=zh-TW|ja-JP`);
+                        const data = await res.json();
+                        translatedResult.value = data.responseData.translatedText;
+                    } catch (error) {
+                        translatedResult.value = "翻譯失敗，請檢查網路。";
+                    } finally {
+                        isTranslating.value = false;
+                    }
+                };
 
                 const totalCost = computed(() => costList.value.reduce((sum, item) => sum + Number(item.amount), 0));
                 const handleImage = (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (f) => shopForm.value.image = f.target.result; reader.readAsDataURL(file); } };
@@ -214,7 +214,7 @@
                 onMounted(() => { if (window.lucide) lucide.createIcons(); const el = document.getElementById('itinerary-list'); if (el) Sortable.create(el, { animation: 200 }); });
                 onUpdated(() => { if (window.lucide) lucide.createIcons(); });
 
-                return { currentTab, mainTabs, dates, selectedDate, dailyItinerary, jpyInput, totalCost, shoppingList, costList, showModal, shopForm, costForm, handleImage, openAddShopping, openAddCost, saveForm, getIcon, getCatStyle, openNav, getDayCount };
+                return { currentTab, mainTabs, dates, selectedDate, dailyItinerary, jpyInput, totalCost, shoppingList, costList, showModal, shopForm, costForm, handleImage, openAddShopping, openAddCost, saveForm, getIcon, getCatStyle, openNav, getDayCount, transText, translatedResult, isTranslating, translateToJP };
             }
         }).mount('#app');
     </script>
