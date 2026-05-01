@@ -13,7 +13,7 @@
         body { font-family: 'Noto Sans JP', sans-serif; background-color: #E0F2FE; margin: 0; padding: 0; overflow-x: hidden; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .content-card { margin-top: -45px; border-radius: 45px 45px 0 0; position: relative; z-index: 20; box-shadow: 0 -15px 30px rgba(0,0,0,0.05); }
-        .tab-active { background-color: #2dd4bf !important; color: white !important; transform: translateY(-5px); }
+        .tab-active { background-color: #2dd4bf !important; color: white !important; transform: translateY(-5px); box-shadow: 0 10px 15px rgba(45, 212, 191, 0.3); }
         .date-item-active { background: linear-gradient(135deg, #2dd4bf 0%, #06b6d4 100%); color: white; transform: scale(1.1); }
         [v-cloak] { display: none; }
         .modal-bg { background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); }
@@ -22,12 +22,14 @@
 <body>
     <div id="app" v-cloak class="max-w-md mx-auto min-h-screen relative pb-32">
         
-        <!-- Header Banner -->
+        <!-- Header Banner (250px) -->
         <header class="relative w-full h-[250px] overflow-hidden">
             <img src="okinawa.jpg" alt="Okinawa" class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
+            
+            <!-- 頁首 Tab ICON (翻譯助手已加入此處) -->
             <div class="absolute right-4 bottom-16 flex space-x-2 z-30">
-                <button v-for="t in mainTabs" :key="t.id" @click="currentTab = t.id"
+                <button v-for="t in headerTabs" :key="t.id" @click="currentTab = t.id"
                         :class="['p-3 rounded-2xl transition-all duration-300 flex items-center justify-center bg-white/90 shadow-lg', currentTab === t.id ? 'tab-active' : 'text-teal-600']">
                     <i :data-lucide="t.icon" class="w-5 h-5"></i>
                 </button>
@@ -36,37 +38,38 @@
 
         <main class="content-card bg-[#E0F2FE] min-h-screen p-6 text-left">
             
-            <!-- 1. 每日行程表 (順路優化) -->
+            <!-- 1. 每日行程表 (不繞路優化版) -->
             <div v-if="currentTab === 'itinerary'" class="animate-fade-in">
                 <div class="bg-white/70 backdrop-blur rounded-[30px] p-5 mb-6 flex items-center justify-between border border-white">
                     <div class="flex items-center space-x-4">
                         <div class="bg-orange-100 p-3 rounded-2xl text-orange-500"><i data-lucide="sun" class="w-8 h-8"></i></div>
-                        <div><p class="text-2xl font-bold text-gray-800">26°C</p><p class="text-[10px] text-gray-400 font-bold uppercase">那霸市 · 多雲時晴</p></div>
+                        <div><p class="text-2xl font-bold text-gray-800">26°C</p><p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">那霸市 · 多雲時晴</p></div>
                     </div>
                     <span class="bg-teal-500 text-white text-[10px] px-3 py-1 rounded-full font-bold">Day {{ getDayCount() }}</span>
                 </div>
 
+                <!-- 橫向日期選單 -->
                 <div class="flex space-x-4 overflow-x-auto hide-scrollbar mb-8 py-2">
                     <div v-for="d in dates" :key="d.day" @click="selectedDate = d.day"
                          :class="['flex-shrink-0 w-16 h-24 rounded-3xl flex flex-col items-center justify-center cursor-pointer transition-all shadow-sm', 
                                  selectedDate === d.day ? 'date-item-active' : 'bg-white text-gray-400']">
-                        <span class="text-xs font-bold mb-1 uppercase font-bold">{{ d.week }}</span>
+                        <span class="text-xs font-bold mb-1 uppercase">{{ d.week }}</span>
                         <span class="text-2xl font-bold">{{ d.day }}</span>
                     </div>
                 </div>
 
                 <div id="itinerary-list" class="space-y-6">
-                    <div v-for="(item, idx) in dailyItinerary[selectedDate]" :key="item.id" class="itinerary-item">
+                    <div v-for="(item, idx) in dailyItinerary[selectedDate]" :key="item.id" @click="openEditItinerary(item)">
                         <div v-if="idx > 0" class="flex items-center justify-center space-x-2 my-4 text-cyan-600/40 font-bold text-[10px]">
                             <div class="h-[1px] bg-cyan-200 flex-grow"></div>
                             <i data-lucide="move-down" class="w-4 h-4"></i>
-                            <span>預計順路行駛</span>
+                            <span>預計順路行程</span>
                             <div class="h-[1px] bg-cyan-200 flex-grow"></div>
                         </div>
-
-                        <div v-if="item.category === '航班'" class="bg-gradient-to-br from-teal-400 to-cyan-500 rounded-[35px] p-6 text-white shadow-xl">
+                        <div v-if="item.category === '航班'" class="bg-gradient-to-br from-teal-400 to-cyan-500 rounded-[35px] p-6 text-white shadow-xl relative overflow-hidden">
+                            <div class="absolute -right-4 -top-4 opacity-20"><i data-lucide="plane" class="w-24 h-24"></i></div>
                             <div class="flex justify-between items-center mb-4"><span class="bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold">{{ item.flightNo }}</span></div>
-                            <div class="flex justify-between items-center text-center">
+                            <div class="flex justify-between items-center text-center px-4">
                                 <div><p class="text-3xl font-bold">{{ item.depTime }}</p><p class="text-[10px] opacity-70">HKG</p></div>
                                 <i data-lucide="arrow-right" class="w-6 h-6 opacity-50"></i>
                                 <div><p class="text-3xl font-bold">{{ item.arrTime }}</p><p class="text-[10px] opacity-70">OKA</p></div>
@@ -88,71 +91,72 @@
                 <button @click="openAddItinerary()" class="fixed bottom-24 right-6 w-16 h-16 bg-teal-500 text-white rounded-full shadow-2xl z-50 flex items-center justify-center"><i data-lucide="plus" class="w-8 h-8"></i></button>
             </div>
 
-            <!-- 2. 資訊/翻譯分頁 -->
-            <div v-if="currentTab === 'info'" class="animate-fade-in space-y-6">
-                <!-- 即時翻譯助手 -->
-                <div class="bg-white rounded-[35px] p-6 shadow-sm border border-white">
+            <!-- 2. 翻譯分頁 (獨立分頁) -->
+            <div v-if="currentTab === 'translate'" class="animate-fade-in space-y-6">
+                <div class="bg-white rounded-[35px] p-8 shadow-sm border border-white">
                     <div class="flex items-center space-x-2 mb-4 text-teal-600 font-bold">
                         <i data-lucide="languages" class="w-5 h-5"></i>
                         <h3>日文翻譯助手</h3>
                     </div>
-                    <textarea v-model="transText" placeholder="請輸入中文或英文..." class="w-full bg-gray-50 rounded-2xl p-4 text-sm outline-none h-24 focus:ring-2 focus:ring-teal-200 transition-all font-bold"></textarea>
-                    <button @click="translateToJP" :disabled="isTranslating" class="w-full mt-3 bg-teal-500 text-white py-3 rounded-2xl font-bold text-sm shadow-lg active:scale-95 transition-all">
-                        {{ isTranslating ? '翻譯中...' : '自動翻譯成日文' }}
+                    <textarea v-model="transText" placeholder="輸入中文或英文..." class="w-full bg-gray-50 rounded-2xl p-4 text-sm outline-none h-32 focus:ring-2 focus:ring-teal-200 transition-all font-bold mb-4"></textarea>
+                    <button @click="translateToJP" :disabled="isTranslating" class="w-full bg-teal-500 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all">
+                        {{ isTranslating ? '正在溝通中...' : '轉換為日文' }}
                     </button>
-                    <div v-if="translatedResult" class="mt-4 p-4 bg-teal-50 rounded-2xl border border-teal-100 animate-fade-in">
-                        <p class="text-[10px] text-teal-400 font-bold uppercase mb-1">日文結果：</p>
-                        <p class="text-teal-700 font-bold text-lg">{{ translatedResult }}</p>
+                    <div v-if="translatedResult" class="mt-6 p-5 bg-teal-50 rounded-[25px] border border-teal-100">
+                        <p class="text-[10px] text-teal-400 font-bold uppercase mb-2">日文結果：</p>
+                        <p class="text-teal-700 font-bold text-xl">{{ translatedResult }}</p>
                     </div>
-                </div>
-
-                <!-- 匯率工具 -->
-                <div class="bg-white rounded-[35px] p-8 shadow-sm text-center">
-                    <h2 class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">JPY to HKD Exchange</h2>
-                    <input type="number" v-model="jpyInput" class="w-full text-center text-5xl font-bold outline-none bg-transparent mb-2">
-                    <p class="text-4xl font-bold text-teal-600 tracking-tighter">$ {{ (jpyInput * 0.051).toFixed(2) }} <span class="text-xs font-bold">HKD</span></p>
                 </div>
             </div>
 
-            <!-- 3. 購物清單 -->
+            <!-- 3. 資訊分頁 -->
+            <div v-if="currentTab === 'info'" class="animate-fade-in space-y-6">
+                <div class="bg-white rounded-[35px] p-8 shadow-sm text-center">
+                    <h2 class="text-xs font-bold text-gray-400 uppercase mb-4 tracking-widest">匯率換算</h2>
+                    <input type="number" v-model="jpyInput" class="w-full text-center text-5xl font-bold outline-none bg-transparent mb-2">
+                    <p class="text-4xl font-bold text-teal-600">$ {{ (jpyInput * 0.051).toFixed(2) }} <span class="text-xs">HKD</span></p>
+                </div>
+                <div class="bg-white rounded-[30px] p-6 shadow-sm border border-white">
+                    <h3 class="font-bold mb-2">住宿：ナナマンビルⅡ</h3>
+                    <button @click="openNav('ナナマンビルⅡ')" class="w-full mt-4 bg-teal-50 text-teal-600 py-3 rounded-2xl font-bold text-xs">開啟飯店導航</button>
+                </div>
+            </div>
+
+            <!-- 4. 購物 & 5. 花費 (簡化呈現) -->
             <div v-if="currentTab === 'shopping'" class="animate-fade-in space-y-4">
-                <div v-for="item in shoppingList" :key="item.id" class="bg-white rounded-[30px] p-4 shadow-sm flex items-center">
-                    <div class="w-20 h-20 bg-gray-100 rounded-2xl overflow-hidden mr-4"><img v-if="item.image" :src="item.image" class="w-full h-full object-cover"></div>
-                    <p class="font-bold text-gray-800">{{ item.name }}</p>
+                <div v-for="item in shoppingList" :key="item.id" class="bg-white rounded-[30px] p-4 flex items-center shadow-sm">
+                    <div class="w-16 h-16 bg-gray-100 rounded-xl mr-4 overflow-hidden"><img v-if="item.image" :src="item.image" class="w-full h-full object-cover"></div>
+                    <p class="font-bold">{{ item.name }}</p>
                 </div>
                 <button @click="openAddShopping()" class="fixed bottom-24 right-6 w-16 h-16 bg-teal-500 text-white rounded-full shadow-2xl z-50 flex items-center justify-center"><i data-lucide="plus" class="w-8 h-8"></i></button>
             </div>
 
-            <!-- 4. 花費紀錄 -->
             <div v-if="currentTab === 'cost'" class="animate-fade-in space-y-6">
-                <div class="bg-gradient-to-br from-teal-400 to-cyan-500 rounded-[35px] p-8 text-white shadow-xl">
-                    <p class="text-xs font-bold uppercase opacity-80 mb-1">Total (JPY)</p>
-                    <p class="text-5xl font-bold tracking-tighter">¥ {{ totalCost }}</p>
-                </div>
-                <div v-for="c in costList" :key="c.id" class="bg-white rounded-[30px] p-5 flex justify-between items-center shadow-sm">
-                    <div><p class="font-bold text-gray-800">{{ c.name }}</p><p class="text-[10px] text-gray-400 font-bold">{{ c.date }} · {{ c.payMethod }}</p></div>
-                    <p class="text-lg font-bold text-teal-600">¥ {{ c.amount }}</p>
+                <div class="bg-gradient-to-br from-teal-400 to-cyan-500 rounded-[35px] p-8 text-white shadow-xl text-center">
+                    <p class="text-xs font-bold opacity-80 uppercase mb-1">Total Expenses</p>
+                    <p class="text-5xl font-bold">¥ {{ totalCost }}</p>
                 </div>
                 <button @click="openAddCost()" class="fixed bottom-24 right-6 w-16 h-16 bg-teal-500 text-white rounded-full shadow-2xl z-50 flex items-center justify-center"><i data-lucide="plus" class="w-8 h-8"></i></button>
             </div>
+
         </main>
 
-        <!-- 底部導航 -->
-        <nav class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t px-10 py-5 flex justify-between items-center z-40 max-w-md mx-auto">
-            <button v-for="t in mainTabs" :key="t.id" @click="currentTab = t.id"
-                    :class="['flex flex-col items-center space-y-1', currentTab === t.id ? 'text-teal-500' : 'text-gray-300']">
+        <!-- 底部導航 (包含所有五個 ICON) -->
+        <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-xl border-t px-6 py-5 flex justify-between items-center z-40 max-w-md mx-auto">
+            <button v-for="t in allTabs" :key="t.id" @click="currentTab = t.id"
+                    :class="['flex flex-col items-center transition-all', currentTab === t.id ? 'text-teal-500 font-bold' : 'text-gray-300']">
                 <i :data-lucide="t.icon" class="w-6 h-6"></i>
-                <span class="text-[8px] font-bold uppercase">{{ t.name }}</span>
+                <span class="text-[7px] uppercase mt-1">{{ t.name }}</span>
             </button>
         </nav>
 
-        <!-- 彈窗 -->
+        <!-- 通用新增彈窗 -->
         <div v-if="showModal" class="fixed inset-0 z-50 modal-bg flex items-end">
-            <div class="bg-white w-full max-w-md mx-auto rounded-t-[45px] p-8 animate-fade-in shadow-2xl">
+            <div class="bg-white w-full max-w-md mx-auto rounded-t-[45px] p-8 animate-fade-in">
                 <div class="flex justify-between items-center mb-6"><h2 class="text-xl font-bold">新增資料</h2><button @click="showModal = false" class="text-gray-300"><i data-lucide="x"></i></button></div>
                 <div v-if="currentTab === 'shopping'" class="space-y-4"><input v-model="shopForm.name" placeholder="商品名稱" class="w-full border-b py-2 font-bold outline-none"><input type="file" @change="handleImage" class="w-full py-2 text-xs"></div>
-                <div v-if="currentTab === 'cost'" class="space-y-4 text-left"><input v-model="costForm.name" placeholder="名稱" class="w-full border-b py-2 font-bold outline-none"><input type="number" v-model="costForm.amount" placeholder="金額 (JPY)" class="w-full border-b py-2 font-bold outline-none"></div>
-                <button @click="saveForm" class="w-full mt-8 bg-teal-500 text-white font-bold py-4 rounded-2xl shadow-lg">儲存</button>
+                <div v-if="currentTab === 'cost'" class="space-y-4 text-left"><input v-model="costForm.name" placeholder="花費項目" class="w-full border-b py-2 font-bold outline-none"><input type="number" v-model="costForm.amount" placeholder="金額 (JPY)" class="w-full border-b py-2 font-bold outline-none"></div>
+                <button @click="saveForm" class="w-full mt-8 bg-teal-500 text-white font-bold py-4 rounded-2xl shadow-lg">確認儲存</button>
             </div>
         </div>
     </div>
@@ -165,8 +169,6 @@
                 const selectedDate = ref(14);
                 const jpyInput = ref(1000);
                 const showModal = ref(false);
-                
-                // 翻譯功能變數
                 const transText = ref('');
                 const translatedResult = ref('');
                 const isTranslating = ref(false);
@@ -174,11 +176,20 @@
                 const shoppingList = ref([]);
                 const costList = ref([]);
                 const shopForm = ref({ name: '', image: null });
-                const costForm = ref({ name: '', amount: 0, date: '', payMethod: '現金' });
+                const costForm = ref({ name: '', amount: 0 });
 
                 const dates = [{ week: 'Thu', day: 14 }, { week: 'Fri', day: 15 }, { week: 'Sat', day: 16 }, { week: 'Sun', day: 17 }];
-                const mainTabs = [{ id: 'itinerary', icon: 'map-pinned', name: '行程' }, { id: 'info', icon: 'info', name: '資訊' }, { id: 'shopping', icon: 'shopping-basket', name: '購物' }, { id: 'cost', icon: 'banknote', name: '花費' }];
                 
+                // 頁首與導航欄統一使用的 Tab 清單
+                const allTabs = [
+                    { id: 'itinerary', icon: 'map-pinned', name: '行程' },
+                    { id: 'translate', icon: 'languages', name: '翻譯' },
+                    { id: 'info', icon: 'info', name: '資訊' },
+                    { id: 'shopping', icon: 'shopping-basket', name: '購物' },
+                    { id: 'cost', icon: 'banknote', name: '花費' }
+                ];
+                const headerTabs = allTabs; // 讓頁首也顯示全部 ICON
+
                 const dailyItinerary = ref({
                     14: [{ id: 1, category: '航班', flightNo: 'UO828', depTime: '14:25', arrTime: '18:05', time: '14:25' }, { id: 2, category: '美食', name: '國際通 屋台村', time: '20:00' }],
                     15: [{ id: 3, category: '景點', name: '知念岬', time: '10:00' }, { id: 4, category: '景點', name: '沖繩世界 文化王國', time: '12:00' }, { id: 5, category: '美食', name: '系滿海鮮市場', time: '14:00' }, { id: 6, category: '景點', name: '瀬長島', time: '16:00' }, { id: 7, category: '購物', name: 'ASHIBINAA Outlet', time: '18:00' }, { id: 8, category: '購物', name: 'iias 沖繩豐崎', time: '20:00' }],
@@ -186,7 +197,6 @@
                     17: [{ id: 14, category: '景點', name: '波上宮', time: '10:00' }, { id: 15, category: '美食', name: '國際通', time: '13:00' }, { id: 16, category: '航班', flightNo: 'UO829', depTime: '18:50', arrTime: '20:35', time: '18:50' }]
                 });
 
-                // 翻譯功能邏輯
                 const translateToJP = async () => {
                     if (!transText.value) return;
                     isTranslating.value = true;
@@ -194,18 +204,14 @@
                         const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(transText.value)}&langpair=zh-TW|ja-JP`);
                         const data = await res.json();
                         translatedResult.value = data.responseData.translatedText;
-                    } catch (error) {
-                        translatedResult.value = "翻譯失敗，請檢查網路。";
-                    } finally {
-                        isTranslating.value = false;
-                    }
+                    } catch (e) { translatedResult.value = "連線失敗"; } finally { isTranslating.value = false; }
                 };
 
                 const totalCost = computed(() => costList.value.reduce((sum, item) => sum + Number(item.amount), 0));
-                const handleImage = (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (f) => shopForm.value.image = f.target.result; reader.readAsDataURL(file); } };
-                const openAddShopping = () => { shopForm.value = { id: Date.now(), name: '', image: null }; showModal.value = true; };
-                const openAddCost = () => { costForm.value = { id: Date.now(), name: '', amount: 0, date: new Date().toLocaleDateString(), payMethod: '現金' }; showModal.value = true; };
-                const saveForm = () => { if (currentTab.value === 'shopping') shoppingList.value.push({...shopForm.value}); else costList.value.push({...costForm.value}); showModal.value = false; };
+                const handleImage = (e) => { const f = e.target.files[0]; if(f){ const r = new FileReader(); r.onload=(ev)=>shopForm.value.image=ev.target.result; r.readAsDataURL(f); } };
+                const saveForm = () => { if(currentTab.value==='shopping') shoppingList.value.push({...shopForm.value}); else costList.value.push({...costForm.value}); showModal.value=false; };
+                const openAddShopping = () => { shopForm.value={name:'',image:null}; showModal.value=true; };
+                const openAddCost = () => { costForm.value={name:'',amount:0}; showModal.value=true; };
                 const getIcon = (cat) => ({ '美食': 'utensils', '景點': 'map-pin', '航班': 'plane' }[cat] || 'star');
                 const getCatStyle = (cat) => ({ '美食': 'bg-orange-50 text-orange-500', '景點': 'bg-teal-50 text-teal-500' }[cat] || 'bg-gray-50 text-gray-500');
                 const openNav = (n) => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(n)}`, '_blank');
@@ -214,7 +220,7 @@
                 onMounted(() => { if (window.lucide) lucide.createIcons(); const el = document.getElementById('itinerary-list'); if (el) Sortable.create(el, { animation: 200 }); });
                 onUpdated(() => { if (window.lucide) lucide.createIcons(); });
 
-                return { currentTab, mainTabs, dates, selectedDate, dailyItinerary, jpyInput, totalCost, shoppingList, costList, showModal, shopForm, costForm, handleImage, openAddShopping, openAddCost, saveForm, getIcon, getCatStyle, openNav, getDayCount, transText, translatedResult, isTranslating, translateToJP };
+                return { currentTab, allTabs, headerTabs, dates, selectedDate, dailyItinerary, jpyInput, totalCost, shoppingList, costList, showModal, shopForm, costForm, handleImage, saveForm, openAddShopping, openAddCost, getIcon, getCatStyle, openNav, getDayCount, transText, translatedResult, isTranslating, translateToJP };
             }
         }).mount('#app');
     </script>
