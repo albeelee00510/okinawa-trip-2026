@@ -28,7 +28,6 @@
             <img src="okinawa.jpg" alt="Okinawa" class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
             
-            <!-- 頁首 Tab ICON -->
             <div class="absolute right-4 bottom-16 flex space-x-2 z-30">
                 <button v-for="t in allTabs" :key="t.id" @click="currentTab = t.id"
                         :class="['p-3 rounded-2xl transition-all duration-300 flex items-center justify-center bg-white/90 shadow-lg', currentTab === t.id ? 'tab-active' : 'text-teal-600']">
@@ -43,33 +42,33 @@
             <div v-if="currentTab === 'itinerary'" class="animate-fade-in">
                 <div class="bg-white/70 backdrop-blur rounded-[30px] p-5 mb-6 flex items-center justify-between border border-white">
                     <div class="flex items-center space-x-4">
-                        <div class="bg-orange-100 p-3 rounded-2xl text-orange-500"><i data-lucide="sun" class="w-8 h-8"></i></div>
+                        <div class="bg-orange-100 p-3 rounded-2xl text-orange-500 font-bold"><i data-lucide="sun" class="w-8 h-8"></i></div>
                         <div><p class="text-2xl font-bold">26°C</p><p class="text-[10px] text-gray-400 font-bold uppercase">那霸市 · 多雲時晴</p></div>
                     </div>
                     <span class="bg-teal-500 text-white text-[10px] px-3 py-1 rounded-full font-bold">Day {{ getDayCount() }}</span>
                 </div>
-                <div class="flex space-x-4 overflow-x-auto hide-scrollbar mb-8 py-2">
+                <div class="flex space-x-4 overflow-x-auto hide-scrollbar mb-8 py-2 font-bold">
                     <div v-for="d in dates" :key="d.day" @click="selectedDate = d.day"
                          :class="['flex-shrink-0 w-16 h-24 rounded-3xl flex flex-col items-center justify-center cursor-pointer transition-all shadow-sm', selectedDate === d.day ? 'date-item-active' : 'bg-white text-gray-400']">
-                        <span class="text-xs font-bold mb-1 uppercase">{{ d.week }}</span>
-                        <span class="text-2xl font-bold">{{ d.day }}</span>
+                        <span class="text-xs mb-1 uppercase">{{ d.week }}</span>
+                        <span class="text-2xl">{{ d.day }}</span>
                     </div>
                 </div>
                 <div id="itinerary-list" class="space-y-6">
                     <div v-for="(item, idx) in dailyItinerary[selectedDate]" :key="item.id">
                         <div v-if="item.category === '航班'" class="bg-gradient-to-br from-teal-400 to-cyan-500 rounded-[35px] p-6 text-white shadow-xl">
-                            <div class="flex justify-between items-center mb-4"><span class="bg-white/20 px-3 py-1 rounded-full text-[10px] font-bold">{{ item.flightNo }}</span></div>
-                            <div class="flex justify-between items-center text-center">
-                                <div><p class="text-3xl font-bold">{{ item.depTime }}</p><p class="text-[10px] opacity-70">HKG</p></div>
+                            <div class="flex justify-between items-center mb-4 font-bold"><span class="bg-white/20 px-3 py-1 rounded-full text-[10px]">{{ item.flightNo }}</span></div>
+                            <div class="flex justify-between items-center text-center font-bold px-4">
+                                <div><p class="text-3xl">{{ item.depTime }}</p><p class="text-[10px] opacity-70">HKG</p></div>
                                 <i data-lucide="arrow-right" class="w-6 h-6 opacity-50"></i>
-                                <div><p class="text-3xl font-bold">{{ item.arrTime }}</p><p class="text-[10px] opacity-70">OKA</p></div>
+                                <div><p class="text-3xl">{{ item.arrTime }}</p><p class="text-[10px] opacity-70">OKA</p></div>
                             </div>
                         </div>
                         <div v-else class="bg-white rounded-[30px] p-5 shadow-sm border border-white flex items-center space-x-4 active:scale-95 transition-transform">
                             <div :class="['p-4 rounded-2xl', getCatStyle(item.category)]"><i :data-lucide="getIcon(item.category)" class="w-6 h-6"></i></div>
-                            <div class="flex-grow">
-                                <h3 class="font-bold text-gray-800 text-lg">{{ item.name }}</h3>
-                                <div class="grid grid-cols-2 gap-y-1 mt-2 text-[10px] font-bold text-gray-400">
+                            <div class="flex-grow font-bold">
+                                <h3 class="text-gray-800 text-lg">{{ item.name }}</h3>
+                                <div class="grid grid-cols-2 gap-y-1 mt-2 text-[10px] text-gray-400">
                                     <div class="flex items-center"><i data-lucide="clock" class="w-3 h-3 mr-1"></i> {{ item.time }}</div>
                                     <div v-if="item.price" class="text-teal-600"><i data-lucide="ticket" class="w-3 h-3 mr-1"></i> ¥{{ item.price }}</div>
                                 </div>
@@ -79,78 +78,77 @@
                 </div>
             </div>
 
-            <!-- 2. 翻譯分頁 -->
+            <!-- 2. 翻譯 -->
             <div v-if="currentTab === 'translate'" class="animate-fade-in space-y-6">
                 <div class="bg-white rounded-[35px] p-8 shadow-sm border border-white">
                     <div class="flex items-center space-x-2 mb-4 text-teal-600 font-bold"><i data-lucide="languages" class="w-5 h-5"></i><h3>日文翻譯</h3></div>
                     <textarea v-model="transText" placeholder="輸入中文或英文..." class="w-full bg-gray-50 rounded-2xl p-4 text-sm outline-none h-32 font-bold mb-4"></textarea>
-                    <button @click="translateToJP" class="w-full bg-teal-500 text-white py-4 rounded-2xl font-bold shadow-lg">轉換日文</button>
+                    <button @click="translateToJP" class="w-full bg-teal-500 text-white py-4 rounded-2xl font-bold">轉換日文</button>
                     <div v-if="translatedResult" class="mt-6 p-5 bg-teal-50 rounded-[25px] border border-teal-100 font-bold text-teal-700 text-xl">{{ translatedResult }}</div>
                 </div>
             </div>
 
-            <!-- 3. 資訊分頁 -->
-            <div v-if="currentTab === 'info'" class="animate-fade-in space-y-6">
-                <div class="bg-white rounded-[35px] p-8 shadow-sm text-center">
-                    <h2 class="text-xs font-bold text-gray-400 mb-4 uppercase">JPY to HKD</h2>
-                    <input type="number" v-model="jpyInput" class="w-full text-center text-5xl font-bold outline-none bg-transparent mb-2">
-                    <p class="text-4xl font-bold text-teal-600 font-bold">$ {{ (jpyInput * 0.051).toFixed(2) }} HKD</p>
-                </div>
-            </div>
-
-            <!-- 4. 購物分頁 -->
-            <div v-if="currentTab === 'shopping'" class="animate-fade-in space-y-4">
-                <div v-for="item in shoppingList" :key="item.id" class="bg-white rounded-[30px] p-4 flex items-center shadow-sm">
-                    <div class="w-16 h-16 bg-gray-100 rounded-xl mr-4 overflow-hidden"><img v-if="item.image" :src="item.image" class="w-full h-full object-cover"></div>
-                    <p class="font-bold">{{ item.name }}</p>
-                </div>
-                <button @click="openAddShopping()" class="fixed bottom-24 right-6 w-16 h-16 bg-teal-500 text-white rounded-full shadow-2xl flex items-center justify-center"><i data-lucide="plus"></i></button>
-            </div>
-
-            <!-- 5. 記帳分頁 (核心細化功能) -->
+            <!-- 5. 記帳分頁 (已修正：包含個人操作按鈕) -->
             <div v-if="currentTab === 'cost'" class="animate-fade-in space-y-6">
                 <!-- 子分頁導航 -->
-                <div class="flex justify-around bg-white/50 backdrop-blur p-2 rounded-2xl mb-4 font-bold text-sm">
+                <div class="flex justify-around bg-white p-2 rounded-2xl mb-4 font-bold text-sm shadow-sm">
                     <button @click="costSubTab = 'public'" :class="['pb-1 px-2 transition-all', costSubTab === 'public' ? 'sub-tab-active' : 'text-gray-400']">公費</button>
                     <button @click="costSubTab = 'albee'" :class="['pb-1 px-2 transition-all', costSubTab === 'albee' ? 'sub-tab-active' : 'text-gray-400']">Albee 個人</button>
                     <button @click="costSubTab = 'amy'" :class="['pb-1 px-2 transition-all', costSubTab === 'amy' ? 'sub-tab-active' : 'text-gray-400']">Amy 個人</button>
                 </div>
 
-                <!-- 頂部欠款統計 (參考 thread.jpg 樣式) -->
-                <div v-if="costSubTab === 'public'" class="bg-gradient-to-br from-teal-400 to-cyan-500 rounded-[35px] p-6 text-white shadow-xl">
-                    <div class="flex justify-between items-center mb-2 font-bold opacity-80 text-xs"><span>公費總支出 (JPY)</span><span>匯率參考: 1 JPY ≈ 0.051 HKD</span></div>
-                    <p class="text-4xl font-bold tracking-tighter">¥ {{ publicTotal }}</p>
-                    <div class="mt-4 pt-4 border-t border-white/20 grid grid-cols-2 text-center text-[10px] font-bold">
-                        <div class="border-r border-white/10"><p class="opacity-70">Albee 代墊</p><p class="text-lg">¥ {{ albeePaid }}</p></div>
-                        <div><p class="opacity-70">Amy 代墊</p><p class="text-lg">¥ {{ amyPaid }}</p></div>
+                <!-- 頂部統計看板 -->
+                <div class="bg-gradient-to-br from-teal-400 to-cyan-500 rounded-[35px] p-6 text-white shadow-xl">
+                    <div class="flex justify-between items-center mb-2 font-bold opacity-80 text-xs">
+                        <span>{{ costSubTab === 'public' ? '公費總支出' : (costSubTab === 'albee' ? 'Albee 個人支出' : 'Amy 個人支出') }} (JPY)</span>
+                        <span>1 JPY ≈ 0.051 HKD</span>
                     </div>
-                    <div class="mt-4 bg-white/20 p-3 rounded-2xl text-center text-xs font-bold">
-                        <span v-if="owesAmount > 0">{{ owesWho }} 應給對方：<span class="text-yellow-200">¥ {{ Math.abs(owesAmount) }}</span></span>
-                        <span v-else>目前對帳平衡囉！</span>
+                    <p class="text-4xl font-bold tracking-tighter">¥ {{ subTabTotal }}</p>
+                    
+                    <!-- 僅在公費顯示對帳資訊 -->
+                    <div v-if="costSubTab === 'public'">
+                        <div class="mt-4 pt-4 border-t border-white/20 grid grid-cols-2 text-center text-[10px] font-bold">
+                            <div class="border-r border-white/10"><p class="opacity-70">Albee 代墊</p><p class="text-lg">¥ {{ albeePaid }}</p></div>
+                            <div><p class="opacity-70">Amy 代墊</p><p class="text-lg">¥ {{ amyPaid }}</p></div>
+                        </div>
+                        <div class="mt-4 bg-white/20 p-3 rounded-2xl text-center text-xs font-bold">
+                            <span v-if="Math.abs(owesAmount) > 0">{{ owesWho }} 應給對方：<span class="text-yellow-200">¥ {{ Math.abs(owesAmount).toFixed(0) }}</span></span>
+                            <span v-else>目前對帳平衡囉！</span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 公費新增區塊 (參考 thread.jpg 佈局) -->
-                <div v-if="costSubTab === 'public'" class="bg-white rounded-[35px] p-6 shadow-sm border border-white">
-                    <div class="flex items-center space-x-2 mb-4 text-gray-800 font-bold"><i data-lucide="calculator" class="w-5 h-5"></i><h3>新增款項</h3></div>
-                    <input v-model="publicForm.name" placeholder="項目 (如：晚餐)" class="w-full bg-gray-50 rounded-2xl p-4 text-sm font-bold mb-3 outline-none">
-                    <div class="flex space-x-2 mb-3">
-                        <div class="bg-gray-100 px-4 py-3 rounded-2xl flex items-center text-xs font-bold">JPY</div>
-                        <input type="number" v-model="publicForm.amount" placeholder="金額" class="flex-grow bg-gray-50 rounded-2xl p-3 text-sm font-bold outline-none border-l">
-                        <select v-model="publicForm.payer" class="bg-gray-100 px-2 py-3 rounded-2xl text-xs font-bold outline-none">
-                            <option>Albee 代墊</option><option>Amy 代墊</option>
-                        </select>
+                <!-- 新增款項區塊 (根據子分頁動態調整) -->
+                <div class="bg-white rounded-[35px] p-6 shadow-sm border border-white">
+                    <div class="flex items-center space-x-2 mb-4 text-gray-800 font-bold"><i data-lucide="calculator" class="w-5 h-5 text-teal-500"></i><h3>新增紀錄</h3></div>
+                    
+                    <input v-model="costForm.name" placeholder="項目內容" class="w-full bg-gray-50 rounded-2xl p-4 text-sm font-bold mb-3 outline-none">
+                    
+                    <div class="grid grid-cols-1 gap-3 mb-3">
+                        <div class="flex items-center bg-gray-50 rounded-2xl p-1">
+                            <div class="bg-white shadow-sm px-4 py-2 rounded-xl text-xs font-bold text-gray-400">JPY</div>
+                            <input type="number" v-model="costForm.amount" placeholder="金額" class="flex-grow bg-transparent p-3 text-sm font-bold outline-none">
+                        </div>
+                        
+                        <!-- 僅在公費顯示代墊人選擇 -->
+                        <div v-if="costSubTab === 'public'" class="flex items-center bg-gray-50 rounded-2xl p-1">
+                            <div class="bg-white shadow-sm px-4 py-2 rounded-xl text-xs font-bold text-teal-500">支付人</div>
+                            <select v-model="costForm.payer" class="flex-grow bg-transparent p-3 text-sm font-bold outline-none">
+                                <option>Albee 代墊</option>
+                                <option>Amy 代墊</option>
+                            </select>
+                        </div>
                     </div>
-                    <input type="number" v-model="publicForm.debt" placeholder="對方欠款金額 (可不填，自動平分)" class="w-full bg-gray-50 rounded-2xl p-4 text-[10px] font-bold mb-4 outline-none border-dashed border-2">
-                    <button @click="savePublicCost" class="w-full bg-teal-500 text-white py-4 rounded-2xl font-bold shadow-lg">記一筆</button>
+
+                    <button @click="saveCostRecord" class="w-full bg-teal-500 text-white py-4 rounded-2xl font-bold shadow-lg active:scale-95 transition-all">記一筆</button>
                 </div>
 
-                <!-- 費用清單 -->
+                <!-- 費用明細清單 -->
                 <div class="space-y-4">
                     <div v-for="c in filteredCosts" :key="c.id" class="bg-white rounded-[30px] p-5 flex justify-between items-center shadow-sm">
                         <div class="text-left font-bold">
                             <p class="text-gray-800">{{ c.name }}</p>
-                            <p class="text-[10px] text-gray-400">{{ c.payer }} · {{ c.payMethod || '現金' }}</p>
+                            <p class="text-[10px] text-gray-400">{{ c.payer || '個人支出' }}</p>
                         </div>
                         <p class="text-lg font-bold text-teal-600">¥ {{ c.amount }}</p>
                     </div>
@@ -176,22 +174,20 @@
                 const costSubTab = ref('public');
                 const selectedDate = ref(14);
                 const jpyInput = ref(1000);
-                const showModal = ref(false);
                 const transText = ref('');
                 const translatedResult = ref('');
 
-                // 記帳數據
-                const publicForm = ref({ name: '', amount: null, payer: 'Albee 代墊', debt: null });
+                // 數據儲存
                 const publicCosts = ref([]);
                 const albeePersonal = ref([]);
                 const amyPersonal = ref([]);
+                const costForm = ref({ name: '', amount: null, payer: 'Albee 代墊' });
 
                 const dates = [{ week: 'Thu', day: 14 }, { week: 'Fri', day: 15 }, { week: 'Sat', day: 16 }, { week: 'Sun', day: 17 }];
                 const allTabs = [
                     { id: 'itinerary', icon: 'map-pinned', name: '行程' },
                     { id: 'translate', icon: 'languages', name: '翻譯' },
                     { id: 'info', icon: 'info', name: '資訊' },
-                    { id: 'shopping', icon: 'shopping-basket', name: '購物' },
                     { id: 'cost', icon: 'banknote', name: '記帳' }
                 ];
 
@@ -202,27 +198,30 @@
                     17: [{ id: 14, category: '景點', name: '波上宮', time: '10:00' }, { id: 15, category: '美食', name: '國際通', time: '13:00' }, { id: 16, category: '航班', flightNo: 'UO829', depTime: '18:50', arrTime: '20:35', time: '18:50' }]
                 };
 
-                // 記帳計算邏輯
-                const publicTotal = computed(() => publicCosts.value.reduce((s, i) => s + Number(i.amount), 0));
-                const albeePaid = computed(() => publicCosts.value.filter(i => i.payer === 'Albee 代墊').reduce((s, i) => s + Number(i.amount), 0));
-                const amyPaid = computed(() => publicCosts.value.filter(i => i.payer === 'Amy 代墊').reduce((s, i) => s + Number(i.amount), 0));
-                
-                const owesAmount = computed(() => {
-                    const diff = (albeePaid.value - amyPaid.value) / 2;
-                    return diff;
-                });
-                const owesWho = computed(() => owesAmount.value > 0 ? 'Amy' : 'Albee');
-
+                // 記帳計算
                 const filteredCosts = computed(() => {
                     if (costSubTab.value === 'public') return publicCosts.value;
                     if (costSubTab.value === 'albee') return albeePersonal.value;
                     return amyPersonal.value;
                 });
 
-                const savePublicCost = () => {
-                    if (!publicForm.value.name || !publicForm.value.amount) return;
-                    publicCosts.value.unshift({ id: Date.now(), ...publicForm.value });
-                    publicForm.value = { name: '', amount: null, payer: 'Albee 代墊', debt: null };
+                const subTabTotal = computed(() => filteredCosts.value.reduce((s, i) => s + Number(i.amount), 0));
+                
+                // 公費對帳邏輯
+                const albeePaid = computed(() => publicCosts.value.filter(i => i.payer === 'Albee 代墊').reduce((s, i) => s + Number(i.amount), 0));
+                const amyPaid = computed(() => publicCosts.value.filter(i => i.payer === 'Amy 代墊').reduce((s, i) => s + Number(i.amount), 0));
+                const owesAmount = computed(() => (albeePaid.value - amyPaid.value) / 2);
+                const owesWho = computed(() => owesAmount.value > 0 ? 'Amy' : 'Albee');
+
+                const saveCostRecord = () => {
+                    if (!costForm.value.name || !costForm.value.amount) return;
+                    const record = { id: Date.now(), ...costForm.value };
+                    
+                    if (costSubTab.value === 'public') publicCosts.value.unshift(record);
+                    else if (costSubTab.value === 'albee') albeePersonal.value.unshift(record);
+                    else amyPersonal.value.unshift(record);
+                    
+                    costForm.value = { name: '', amount: null, payer: 'Albee 代墊' };
                 };
 
                 const translateToJP = async () => {
@@ -231,7 +230,7 @@
                         const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(transText.value)}&langpair=zh-TW|ja-JP`);
                         const data = await res.json();
                         translatedResult.value = data.responseData.translatedText;
-                    } catch (e) { translatedResult.value = "連線失敗"; }
+                    } catch (e) { translatedResult.value = "翻譯失敗"; }
                 };
 
                 const getIcon = (cat) => ({ '美食': 'utensils', '景點': 'map-pin', '航班': 'plane' }[cat] || 'star');
@@ -242,7 +241,7 @@
                 onMounted(() => { if (window.lucide) lucide.createIcons(); });
                 onUpdated(() => { if (window.lucide) lucide.createIcons(); });
 
-                return { currentTab, allTabs, dates, selectedDate, dailyItinerary, jpyInput, publicCosts, albeePersonal, amyPersonal, publicForm, publicTotal, albeePaid, amyPaid, owesAmount, owesWho, costSubTab, filteredCosts, savePublicCost, getIcon, getCatStyle, openNav, getDayCount, transText, translatedResult, translateToJP };
+                return { currentTab, allTabs, dates, selectedDate, dailyItinerary, jpyInput, publicCosts, albeePersonal, amyPersonal, costForm, subTabTotal, albeePaid, amyPaid, owesAmount, owesWho, costSubTab, filteredCosts, saveCostRecord, getIcon, getCatStyle, openNav, getDayCount, transText, translatedResult, translateToJP };
             }
         }).mount('#app');
     </script>
